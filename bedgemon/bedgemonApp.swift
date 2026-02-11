@@ -9,9 +9,14 @@ import SwiftUI
 
 @main
 struct bedgemonApp: App {
+    @StateObject private var auth = AuthManager()
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(auth: auth)
+                .onAppear {
+                    Task { await auth.checkRestoreSession() }
+                }
         }
     }
 }

@@ -8,17 +8,21 @@
 import SwiftUI
 
 struct ContentView: View {
+    @ObservedObject var auth: AuthManager
+
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        Group {
+            if let profile = auth.profile {
+                HomeView(profile: profile)
+            } else if auth.pendingAppleUserID != nil {
+                ChooseProfileView(auth: auth)
+            } else {
+                SignInView(auth: auth)
+            }
         }
-        .padding()
     }
 }
 
 #Preview {
-    ContentView()
+    ContentView(auth: AuthManager())
 }
