@@ -23,15 +23,13 @@ struct WorkoutTrackerView: View {
     var body: some View {
         List {
             Section {
-                Picker("For", selection: $selectedProfile) {
+                Picker("Profile", selection: $selectedProfile) {
                     Text("Sarah").tag(Profile.sarah)
                     Text("Dan").tag(Profile.dan)
                 }
                 .pickerStyle(.segmented)
             } header: {
                 Text("Workouts for")
-            } footer: {
-                Text("Choose who the workout is for. You can start workouts and view history for either.")
             }
 
             if let current = currentWorkout {
@@ -39,19 +37,30 @@ struct WorkoutTrackerView: View {
                     Button {
                         editingCurrentDraft = current
                     } label: {
-                        HStack {
-                            Label("Current workout", systemImage: "figure.run")
-                                .font(.headline)
-                            Spacer()
+                        HStack(spacing: 12) {
+                            Image(systemName: "figure.run")
+                                .font(.title2)
+                                .foregroundStyle(.tint)
+                                .frame(width: 32, alignment: .center)
                             Text(shortDate(current.date))
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
+                                .font(.body.weight(.medium))
+                                .foregroundStyle(.primary)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(.tertiary)
                         }
+                        .padding(.vertical, 8)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .contentShape(Rectangle())
                     }
+                    .buttonStyle(.plain)
+                    .listRowBackground(Color.accentColor.opacity(0.08))
+                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                 } header: {
                     Text("Current workout")
                 } footer: {
-                    Text("Tap to add or edit exercises. Finish the workout to save it to past workouts.")
+                    Text("Tap to open. Tap Finish to save.")
                 }
             }
 
@@ -59,15 +68,14 @@ struct WorkoutTrackerView: View {
                 Button {
                     showingStartWorkout = true
                 } label: {
-                    Label("Start new workout", systemImage: "plus.circle.fill")
+                    Label("Start workout", systemImage: "play.fill")
                         .font(.headline)
+                        .frame(maxWidth: .infinity)
                 }
+                .buttonStyle(.borderedProminent)
+                .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
             } header: {
-                Text(currentWorkout == nil ? "Start a workout" : "Or start another later")
-            } footer: {
-                if currentWorkout == nil {
-                    Text("Creates a current workout you can open to log exercises, then finish to save to past workouts.")
-                }
+                Text("New workout")
             }
 
             Section {
@@ -79,13 +87,14 @@ struct WorkoutTrackerView: View {
                 NavigationLink {
                     ExerciseCollectionsView()
                 } label: {
-                    Label("Templates", systemImage: "list.bullet.rectangle")
+                    Label("Templates", systemImage: "square.stack.3d.up")
                 }
             } header: {
-                Text("Past workouts")
+                Text("History")
             }
         }
-        .navigationTitle("Workout Tracker")
+        .listSectionSpacing(24)
+        .navigationTitle("Workouts")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { refreshCurrentWorkout() }
         .onChange(of: selectedProfile) { _, _ in refreshCurrentWorkout() }

@@ -31,41 +31,71 @@ struct WorkoutDayDetailView: View {
 
     var body: some View {
         List {
-            Section("Date") {
-                Text(Self.dateFormatter.string(from: currentDay.date))
-            }
-            Section("Exercises") {
-                if currentDay.exercises.isEmpty {
-                    Text("No exercises yet. Tap Edit to add some.")
+            Section {
+                HStack(spacing: 12) {
+                    Image(systemName: "calendar")
+                        .font(.body)
                         .foregroundStyle(.secondary)
+                        .frame(width: 28, alignment: .center)
+                    Text(Self.dateFormatter.string(from: currentDay.date))
+                        .font(.title3.weight(.semibold))
+                }
+                .padding(.vertical, 8)
+                .listRowBackground(Color(.secondarySystemGroupedBackground))
+            } header: {
+                Text("Date")
+            }
+
+            Section {
+                if currentDay.exercises.isEmpty {
+                    ContentUnavailableView {
+                        Label("No exercises", systemImage: "figure.strengthtraining.traditional")
+                    } description: {
+                        Text("Tap Edit to add exercises and sets.")
+                    }
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
                 } else {
                     ForEach(currentDay.exercises) { exercise in
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text(exercise.name)
-                                .font(.headline)
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack(spacing: 8) {
+                                Image(systemName: "dumbbell.fill")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                Text(exercise.name)
+                                    .font(.headline)
+                            }
                             ForEach(Array(exercise.sets.enumerated()), id: \.offset) { index, set in
                                 HStack {
                                     Text("Set \(index + 1)")
                                         .font(.subheadline)
-                                    Spacer()
+                                        .foregroundStyle(.secondary)
+                                        .frame(width: 40, alignment: .leading)
                                     Text("\(set.reps) reps")
+                                        .font(.subheadline)
                                     Text("\(formatWeight(set.weight)) lb")
+                                        .font(.subheadline)
                                         .foregroundStyle(.secondary)
                                 }
-                                .font(.subheadline)
                             }
                         }
-                        .padding(.vertical, 4)
+                        .padding(.vertical, 12)
+                        .padding(.horizontal, 4)
+                        .listRowBackground(Color(.secondarySystemGroupedBackground))
                     }
                 }
+            } header: {
+                Text("Exercises")
             }
         }
-        .navigationTitle("Workout Day")
+        .listSectionSpacing(20)
+        .navigationTitle("Workout")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             if onEditSave != nil {
                 ToolbarItem(placement: .primaryAction) {
                     Button("Edit") { showingEdit = true }
+                        .fontWeight(.semibold)
                 }
             }
         }

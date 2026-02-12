@@ -26,8 +26,10 @@ struct StartWorkoutView: View {
     var body: some View {
         NavigationStack {
             List {
-                    Section("Date") {
-                        DatePicker("Workout date", selection: $date, displayedComponents: .date)
+                    Section {
+                        DatePicker("Date", selection: $date, displayedComponents: .date)
+                    } header: {
+                        Text("When")
                     }
 
                     Section {
@@ -43,7 +45,7 @@ struct StartWorkoutView: View {
                                 selectedTemplate = nil
                             } label: {
                                 HStack {
-                                    Text("Start from scratch")
+                                    Text("No template")
                                         .foregroundStyle(.primary)
                                     Spacer()
                                     if selectedTemplate == nil {
@@ -78,7 +80,7 @@ struct StartWorkoutView: View {
                     } header: {
                         Text("Template")
                     } footer: {
-                        Text("Optional. A template pre-fills the exercise list when you open the current workout.")
+                        Text("Optional.")
                     }
 
                     Section {
@@ -91,13 +93,15 @@ struct StartWorkoutView: View {
                             onStartWorkout(draft)
                             dismiss()
                         } label: {
-                            Label("Start workout", systemImage: "plus.circle.fill")
+                            Label("Start workout", systemImage: "play.fill")
                                 .font(.headline)
+                                .frame(maxWidth: .infinity)
                         }
-                    } footer: {
-                        Text("A \"Current workout\" will appear on the tracker. Tap it to add or edit exercises, then finish to save to past workouts.")
+                        .buttonStyle(.borderedProminent)
+                        .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
                     }
                 }
+                .listSectionSpacing(20)
                 .navigationTitle("New workout")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {

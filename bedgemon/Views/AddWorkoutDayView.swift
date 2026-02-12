@@ -41,51 +41,96 @@ struct AddWorkoutDayView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section("Date") {
-                    DatePicker("Day", selection: $date, displayedComponents: .date)
-                }
                 Section {
-                    ForEach(exercises) { exercise in
-                        Button {
-                            editingExercise = exercise
-                        } label: {
-                            HStack(alignment: .top) {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(exerciseDisplayName(exercise))
-                                        .font(.body.weight(.medium))
-                                        .foregroundStyle(.primary)
-                                    if !exercise.sets.isEmpty {
-                                        Text(exerciseSetSummary(exercise))
-                                            .font(.caption)
-                                            .foregroundStyle(.secondary)
-                                    }
-                                }
-                                Spacer()
-                                Text("\(exercise.totalSets) set\(exercise.totalSets == 1 ? "" : "s")")
-                                    .font(.subheadline)
-                                    .foregroundStyle(.secondary)
-                            }
-                            .padding(.vertical, 2)
-                        }
+                    HStack(spacing: 12) {
+                        Image(systemName: "calendar")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                            .frame(width: 28, alignment: .center)
+                        DatePicker("", selection: $date, displayedComponents: .date)
+                            .labelsHidden()
                     }
-                    .onDelete(perform: deleteExercises)
+                    .padding(.vertical, 4)
+                    .listRowBackground(Color(.secondarySystemGroupedBackground))
+                } header: {
+                    Text("Date")
+                }
+
+                Section {
+                    if exercises.isEmpty {
+                        VStack(spacing: 12) {
+                            Image(systemName: "figure.strengthtraining.traditional")
+                                .font(.system(size: 36))
+                                .foregroundStyle(.tertiary)
+                            Text("No exercises yet")
+                                .font(.subheadline.weight(.medium))
+                                .foregroundStyle(.secondary)
+                            Text("Tap below to add your first exercise.")
+                                .font(.caption)
+                                .foregroundStyle(.tertiary)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 24)
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                    } else {
+                        ForEach(exercises) { exercise in
+                            Button {
+                                editingExercise = exercise
+                            } label: {
+                                HStack(alignment: .center, spacing: 12) {
+                                    Image(systemName: "dumbbell.fill")
+                                        .font(.subheadline)
+                                        .foregroundStyle(.secondary)
+                                        .frame(width: 28, alignment: .center)
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(exerciseDisplayName(exercise))
+                                            .font(.body.weight(.medium))
+                                            .foregroundStyle(.primary)
+                                        if !exercise.sets.isEmpty {
+                                            Text(exerciseSetSummary(exercise))
+                                                .font(.caption)
+                                                .foregroundStyle(.secondary)
+                                        }
+                                    }
+                                    Spacer()
+                                    Text("\(exercise.totalSets) set\(exercise.totalSets == 1 ? "" : "s")")
+                                        .font(.subheadline)
+                                        .foregroundStyle(.secondary)
+                                    Image(systemName: "chevron.right")
+                                        .font(.caption.weight(.semibold))
+                                        .foregroundStyle(.tertiary)
+                                }
+                                .padding(.vertical, 10)
+                                .padding(.horizontal, 4)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            .listRowBackground(Color(.secondarySystemGroupedBackground))
+                        }
+                        .onDelete(perform: deleteExercises)
+                    }
+
                     Button {
                         let newEx = ExerciseEntry(name: "")
                         editingExercise = newEx
                     } label: {
                         Label("Add exercise", systemImage: "plus.circle.fill")
-                            .font(.subheadline.weight(.medium))
+                            .font(.subheadline.weight(.semibold))
                     }
+                    .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
                 } header: {
                     Text("Exercises")
                 } footer: {
                     if isOngoingWorkout {
-                        Text("Add exercises and sets as you go. Tap \"Finish\" when done to save to past workouts.")
+                        Text("When you're done, tap Finish to save this workout to history.")
                     } else {
-                        Text("Add exercises as you go. You can save with no exercises and add more later.")
+                        Text("Save to keep your changes.")
                     }
                 }
             }
+            .listSectionSpacing(20)
             .navigationTitle(
                 isOngoingWorkout ? "Current workout" : (existingDay == nil ? "New workout" : "Edit workout")
             )
@@ -96,6 +141,7 @@ struct AddWorkoutDayView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(isOngoingWorkout ? "Finish" : "Save") { save() }
+                        .fontWeight(.semibold)
                 }
             }
             .sheet(item: $editingExercise) { exercise in

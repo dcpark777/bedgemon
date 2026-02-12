@@ -37,7 +37,7 @@ struct PastWorkoutsView: View {
                     Task { await reload() }
                 }
             } header: {
-                Text("Whose workouts")
+                Text("Profile")
             }
 
             if let msg = syncErrorMessage {
@@ -49,20 +49,27 @@ struct PastWorkoutsView: View {
             }
 
             Section {
-                ForEach(days) { day in
-                    NavigationLink(value: day) {
-                        dayRow(day)
+                if days.isEmpty {
+                    ContentUnavailableView(
+                        "No workouts yet",
+                        systemImage: "calendar.badge.clock",
+                        description: Text("Workouts for \(selectedProfile == .sarah ? "Sarah" : "Dan") will appear here.")
+                    )
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                } else {
+                    ForEach(days) { day in
+                        NavigationLink(value: day) {
+                            dayRow(day)
+                        }
                     }
+                    .onDelete(perform: deleteDays)
                 }
-                .onDelete(perform: deleteDays)
             } header: {
                 Text("Workouts")
-            } footer: {
-                if days.isEmpty {
-                    Text("No workouts yet for \(selectedProfile == .sarah ? "Sarah" : "Dan").")
-                }
             }
         }
+        .listSectionSpacing(20)
         .navigationTitle("Past workouts")
         .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(for: WorkoutDay.self) { day in
@@ -90,17 +97,23 @@ struct PastWorkoutsView: View {
     }
 
     private func dayRow(_ day: WorkoutDay) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(Self.dateFormatter.string(from: day.date))
-                .font(.headline)
-            if !day.exercises.isEmpty {
-                Text(day.exercises.map(\.name).joined(separator: ", "))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(2)
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: "calendar")
+                .font(.body.weight(.medium))
+                .foregroundStyle(.secondary)
+                .frame(width: 24, alignment: .center)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(Self.dateFormatter.string(from: day.date))
+                    .font(.headline)
+                if !day.exercises.isEmpty {
+                    Text(day.exercises.map(\.name).joined(separator: ", "))
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                }
             }
+            .padding(.vertical, 2)
         }
-        .padding(.vertical, 2)
     }
 
     private func reload() async {
@@ -127,3 +140,4 @@ struct PastWorkoutsView: View {
         }
     }
 }
+

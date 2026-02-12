@@ -23,39 +23,63 @@ struct ExerciseCollectionsView: View {
                 }
             }
 
-            ForEach(collections) { collection in
-                Button {
-                    editingCollection = collection
-                } label: {
-                    HStack {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(collection.name)
-                                .font(.body.weight(.medium))
-                                .foregroundStyle(.primary)
-                            if !collection.exercises.isEmpty {
-                                Text(collection.exercises.map(\.name).joined(separator: ", "))
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(2)
-                            }
-                        }
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+            Section {
+                if collections.isEmpty && !isLoading {
+                    ContentUnavailableView {
+                        Label("No templates", systemImage: "square.stack.3d.up")
+                    } description: {
+                        Text("Add a template to pre-fill exercises when you start a workout.")
                     }
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                } else {
+                    ForEach(collections) { collection in
+                        Button {
+                            editingCollection = collection
+                        } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: "square.stack.3d.up")
+                                    .font(.body)
+                                    .foregroundStyle(.secondary)
+                                    .frame(width: 24, alignment: .center)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(collection.name)
+                                        .font(.body.weight(.medium))
+                                        .foregroundStyle(.primary)
+                                    if !collection.exercises.isEmpty {
+                                        Text(collection.exercises.map(\.name).joined(separator: ", "))
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                            .lineLimit(2)
+                                    }
+                                }
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.caption.weight(.semibold))
+                                    .foregroundStyle(.tertiary)
+                            }
+                            .padding(.vertical, 4)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    .onDelete(perform: deleteCollections)
                 }
+            } header: {
+                Text("Templates")
             }
-            .onDelete(perform: deleteCollections)
 
             Section {
                 Button {
                     showingAddCollection = true
                 } label: {
                     Label("New template", systemImage: "plus.circle.fill")
+                        .font(.subheadline.weight(.medium))
                 }
             }
         }
+        .listSectionSpacing(20)
         .navigationTitle("Templates")
         .navigationBarTitleDisplayMode(.inline)
         .refreshable { await reload() }

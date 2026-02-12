@@ -27,7 +27,8 @@ struct EditExerciseView: View {
                 exerciseNameSection
                 setsSection
             }
-            .navigationTitle(exercise.name.isEmpty ? "New Exercise" : "Edit Exercise")
+            .listSectionSpacing(16)
+            .navigationTitle(exercise.name.isEmpty ? "New exercise" : "Edit exercise")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -38,11 +39,13 @@ struct EditExerciseView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") { save() }
+                        .fontWeight(.semibold)
                 }
                 ToolbarItem(placement: .keyboard) {
                     HStack {
                         Spacer()
                         Button("Done") { focusedField = nil }
+                            .fontWeight(.medium)
                     }
                 }
             }
@@ -55,14 +58,22 @@ struct EditExerciseView: View {
 
     private var exerciseNameSection: some View {
         Section {
-            TextField("e.g. Bench Press, Squat", text: $name)
-                .focused($focusedField, equals: .name)
-                .submitLabel(.next)
+            HStack(spacing: 12) {
+                Image(systemName: "textformat")
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+                    .frame(width: 28, alignment: .center)
+                TextField("e.g. Bench Press, Squat", text: $name)
+                    .focused($focusedField, equals: .name)
+                    .submitLabel(.next)
+            }
+            .padding(.vertical, 4)
+            .listRowBackground(Color(.secondarySystemGroupedBackground))
         } header: {
-            Text("Exercise name")
+            Text("Name")
         } footer: {
             if name.trimmingCharacters(in: .whitespaces).isEmpty {
-                Text("Give your exercise a name so you can find it later.")
+                Text("Name this exercise so you can find it later.")
             }
         }
     }
@@ -80,15 +91,16 @@ struct EditExerciseView: View {
                 }
             } label: {
                 Label("Add set", systemImage: "plus.circle.fill")
-                    .font(.subheadline.weight(.medium))
+                    .font(.subheadline.weight(.semibold))
             }
+            .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 10, trailing: 16))
         } header: {
             Text("Sets")
         } footer: {
             if sets.isEmpty {
-                Text("Tap \"Add set\" to log reps and weight for each set.")
+                Text("Add sets with reps and weight for each.")
             } else {
-                Text("Swipe left on a set to remove it.")
+                Text("Swipe left on a set to delete.")
             }
         }
     }
@@ -96,13 +108,13 @@ struct EditExerciseView: View {
     private func setRow(index: Int) -> some View {
         HStack(spacing: 16) {
             Text("Set \(index + 1)")
-                .font(.subheadline.weight(.medium))
+                .font(.subheadline.weight(.semibold))
                 .foregroundStyle(.secondary)
-                .frame(width: 44, alignment: .leading)
+                .frame(width: 40, alignment: .leading)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text("Reps")
-                    .font(.caption2)
+                    .font(.caption)
                     .foregroundStyle(.secondary)
                 TextField("0", value: Binding(
                     get: { sets[index].reps },
@@ -116,7 +128,7 @@ struct EditExerciseView: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 Text("Weight (lb)")
-                    .font(.caption2)
+                    .font(.caption)
                     .foregroundStyle(.secondary)
                 TextField("0", value: Binding(
                     get: { sets[index].weight },
@@ -128,7 +140,8 @@ struct EditExerciseView: View {
             }
             .frame(maxWidth: .infinity)
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 8)
+        .listRowBackground(Color(.secondarySystemGroupedBackground))
     }
 
     private func deleteSets(at offsets: IndexSet) {
