@@ -86,10 +86,13 @@ final class AuthManager: NSObject, ObservableObject {
         }
     }
 
+    /// Apple ID email that is treated as Dan. All others (or no email) map to Sarah.
+    private static let danAppleIDEmail = "dan.park.primary@gmail.com"
+
     func signInWithApple() {
         let provider = ASAuthorizationAppleIDProvider()
         let request = provider.createRequest()
-        request.requestedScopes = []
+        request.requestedScopes = [.email]  // needed to get email for profile auto-assignment
 
         let controller = ASAuthorizationController(authorizationRequests: [request])
         controller.delegate = self
@@ -110,6 +113,11 @@ final class AuthManager: NSObject, ObservableObject {
 
     /// Call this when using SwiftUI SignInWithAppleButton's onCompletion(.success(authorization)).
     func handleAuthorization(_ authorization: ASAuthorization) {
+        applyAuthorization(authorization)
+    }
+
+    /// Resolves profile from credential: dan.park.primary@gmail.com → Dan, otherwise → Sarah. Saves mapping so future sign-ins use the same profile.
+    private func applyAuthorization(_ authorization: ASAuthorization) {
         guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential else { return }
         let appleUserID = credential.user
         if let p = mapping[appleUserID] {
@@ -117,8 +125,18 @@ final class AuthManager: NSObject, ObservableObject {
             lastSignedInAppleUserID = appleUserID
             pendingAppleUserID = nil
         } else {
-            pendingAppleUserID = appleUserID
-            profile = nil
+            let resolvedProfile: Profile
+            if let email = credential.email, email == Self.danAppleIDEmail {
+                resolvedProfile = .dan
+            } else {
+                resolvedProfile = .sarah
+            }
+            var m = mapping
+            m[appleUserID] = resolvedProfile
+            mapping = m
+            lastSignedInAppleUserID = appleUserID
+            profile = resolvedProfile
+            pendingAppleUserID = nil
         }
     }
 }
@@ -128,16 +146,7 @@ extension AuthManager: ASAuthorizationControllerDelegate {
         controller: ASAuthorizationController,
         didCompleteWithAuthorization authorization: ASAuthorization
     ) {
-        guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential else { return }
-        let appleUserID = credential.user
-        if let p = mapping[appleUserID] {
-            profile = p
-            lastSignedInAppleUserID = appleUserID
-            pendingAppleUserID = nil
-        } else {
-            pendingAppleUserID = appleUserID
-            profile = nil
-        }
+        applyAuthorization(authorization)
     }
 
     func authorizationController(

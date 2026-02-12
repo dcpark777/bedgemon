@@ -13,7 +13,7 @@ struct ContentView: View {
     var body: some View {
         Group {
             if let profile = auth.profile {
-                HomeView(profile: profile)
+                AppShellView(profile: profile)
             } else if auth.pendingAppleUserID != nil {
                 ChooseProfileView(auth: auth)
             } else {

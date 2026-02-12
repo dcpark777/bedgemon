@@ -10,13 +10,20 @@ import SwiftUI
 @main
 struct bedgemonApp: App {
     @StateObject private var auth = AuthManager()
+    @State private var showContentView = false
 
     var body: some Scene {
         WindowGroup {
-            ContentView(auth: auth)
+            if showContentView {
+                ContentView(auth: auth)
+            } else {
+                InitialSplashView(onHome: {
+                    showContentView = true
+                })
                 .onAppear {
                     Task { await auth.checkRestoreSession() }
                 }
+            }
         }
     }
 }
